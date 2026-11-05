@@ -18,7 +18,6 @@
     }
 
     :root {
-      /* 配色方案 */
       --eva-green: #008738;
       --eva-green-dark: #004d20;
       --eva-green-light: #00a844;
@@ -34,7 +33,6 @@
       --error-color: #fe3501;
       --success-color: #008738;
       
-      /* 優先使用本地離線工程字型 */
       --font-mono: 'JetBrains Mono Local', 'JetBrains Mono', Consolas, Monaco, monospace;
     }
 
@@ -192,7 +190,6 @@
       color: var(--text-sub);
     }
 
-    /* 雙層覆蓋輸入框容器 */
     .overlay-input-wrapper {
       position: relative;
       width: 100%;
@@ -354,7 +351,6 @@
     <span class="clock-time" id="live-time">--:--</span>
   </div>
 
-  <!-- 狀態列：將根據 Service Worker 驗證結果動態切換 -->
   <div id="offline-status" class="status-badge status-warning">🟡 離線模組檢測中...</div>
 
   <div class="mode-selector">
@@ -375,7 +371,7 @@
         <span>最終目標總重：</span>
         <span id="res-target-total">--</span>
       </div>
-      <div class="detail-row">
+      <div class="detail-row" id="row-diff-weight">
         <span>實際需加重量：</span>
         <span id="res-diff-weight">--</span>
       </div>
@@ -396,7 +392,6 @@
   let b737Data = { target: '' };
   let upsData = { planned: '', remaining: '', factor: '0.5', flow: '' };
 
-  // 時鐘更新
   function updateClock() {
     const now = new Date();
     const months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
@@ -415,7 +410,6 @@
   setInterval(updateClock, 1000);
   updateClock();
 
-  // 註冊 Service Worker 並即時驗證離線狀態
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js')
@@ -641,6 +635,9 @@
     let liters = 0;
     let flowRate = 0;
 
+    // 預設顯示「實際需加重量」行，後續在 737 模式會特別隱藏
+    document.getElementById('row-diff-weight').style.display = 'flex';
+
     if (currentMode === 'KG') {
       document.getElementById('res-main-title').textContent = 'ESTIMATED FUEL TO LIFT 預估所需加油量';
       
@@ -728,7 +725,10 @@
 
       document.getElementById('res-liters').innerHTML = `${centerKg.toLocaleString()} <span>KG</span>`;
       document.getElementById('res-target-total').textContent = `${totalKg.toLocaleString()} KG`;
-      document.getElementById('res-diff-weight').textContent = `${centerKg.toLocaleString()} KG`;
+      
+      // 在 737 模式下隱藏「實際需加重量」避免重複誤導
+      document.getElementById('row-diff-weight').style.display = 'none';
+
       document.getElementById('res-status-msg').textContent = "🟢 737 計算成功";
       document.getElementById('res-status-msg').style.color = "var(--eva-green-light)";
       
